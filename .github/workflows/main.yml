@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages and Vercel
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
         #   node-version: 20  # Node版本（可选，根据你的项目调整）
         #   package-manager: npm  # 包管理器（可选，默认检测）
 
-  deploy:
+  deploy-github-pages:
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -33,3 +33,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  trigger-vercel:
+    needs: deploy-github-pages  # 等GitHub Pages部署完再触发Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel Deployment
+        run: curl -X POST -d {} "https://api.vercel.com/v1/integrations/deploy/prj_wEeCKEdaaNHsvyIsSykrlWM7UAJh/scsiPnxQNA"
