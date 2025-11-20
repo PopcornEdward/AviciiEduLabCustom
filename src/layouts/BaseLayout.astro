@@ -1,5 +1,6 @@
 ---
 // src/layouts/BaseLayout.astro
+import ScrollToTopButton from "@/components/global/ScrollToTopButton.astro";
 import BaseHead from "@/components/BaseHead.astro";
 import Footer from "@/components/global/Footer.astro";
 import Header from "@/components/global/Header.astro";
@@ -24,6 +25,7 @@ const backgrounds = [bg1, bg2, bg3, bg4, bg5, bg6, bg7];
     <BaseHead />
   </head>
     <body class="mx-auto relative overflow-x-hidden"> 
+    <ScrollToTopButton />
     
         <SlideshowBackground backgrounds={backgrounds} autoInterval={5000} />
 

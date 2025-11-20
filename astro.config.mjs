@@ -1,19 +1,24 @@
-// astro.config.mjs
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind'; 
 import sitemap from "@astrojs/sitemap";
 
+// ----------------------------------------------------------------------
+// 架构思维：单一配置文件，根据环境变量动态调整配置
+// ----------------------------------------------------------------------
+
+// 关键步骤：读取由 package.json 脚本加载的环境变量。
+// 如果未设置，则回退到安全默认值 (开发环境配置)。
+const SITE = process.env.PUBLIC_SITE || 'http://localhost:4321/';
+const BASE = process.env.PUBLIC_BASE || '/';
+
+console.log(`[Astro Config] Using SITE: ${SITE}`);
+console.log(`[Astro Config] Using BASE: ${BASE}`);
+
 export default defineConfig({
-  // 修改为你的 GitHub Pages 域名（只到 .github.io，不包括仓库名）
-//   vercel netlify
-//   site: 'https://popcornedward.github.io',
-// https://aviciiedulab.dpdns.org/
-// http://www.aviciiedulab.dpdns.org/
-  site: 'https://aviciiedulab.dpdns.org/',
-  
-  // 添加 base 配置，用于仓库级部署（如 /AviciiEduLabCustom/），修复资源路径问题
-  base: '/AviciiEduLabCustom',
+  // 根据环境变量动态设置 site 和 base
+  site: SITE,
+  base: BASE,
   
   integrations: [
     sitemap(),
@@ -28,12 +33,20 @@ export default defineConfig({
   // 启用 Strict 模式的 TypeScript
   typescript: 'strict',
   
+  // 服务器配置 (主要用于 dev 和 preview)
   server: {
     host: true,
     port: 4321,
+    // 允许的主机列表应包含开发和生产环境
     allowedHosts: [
       'dev.myastro.com',
-      '192.168.5.5' 
+      '192.168.5.5',
+      'localhost',
+      '127.0.0.1',
+      'aviciiedulab.dpdns.org', // 生产域名也应允许
     ],
   },
+
+  // 动态设置输出目录，以防开发构建和生产构建冲突
+  outDir: SITE.includes('localhost') ? 'dist-dev' : 'dist',
 });
