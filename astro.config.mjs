@@ -6,7 +6,9 @@ import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   // 修改为你的 GitHub Pages 域名（只到 .github.io，不包括仓库名）
-  site: 'https://popcornedward.github.io',
+//   vercel netlify
+//   site: 'https://popcornedward.github.io',
+  site: 'http://www.aviciiedulab.dpdns.org/',
   
   // 添加 base 配置，用于仓库级部署（如 /AviciiEduLabCustom/），修复资源路径问题
   base: '/AviciiEduLabCustom',
