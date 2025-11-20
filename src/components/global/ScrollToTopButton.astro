@@ -1,0 +1,53 @@
+<button 
+  id="scrollToTopButton"
+  title="回到顶部"
+  class="fixed bottom-6 right-6 p-3 bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out z-50 opacity-0 transform translate-y-4 hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 active:scale-95"
+  aria-label="滚动到页面顶部"
+>
+  <!-- 使用 Lucide Icon 的 SVG 替代，保持轻量和简洁 -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+    <path d="M12 19V5"></path>
+    <path d="m5 12 7-7 7 7"></path>
+  </svg>
+</button>
+
+<script>
+  // 客户端脚本：控制按钮的可见性并实现滚动功能
+
+  const button = document.getElementById('scrollToTopButton');
+  // 滚动阈值：向下滚动 300px 后显示按钮
+  const SCROLL_THRESHOLD = 300; 
+
+  if (button) {
+    // 滚动事件监听器
+    const handleScroll = () => {
+      // 使用 window.scrollY 或 document.documentElement.scrollTop 兼容性更好
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+
+      if (scrollPosition > SCROLL_THRESHOLD) {
+        // 显示按钮：添加可见类，移除隐藏/偏移类
+        button.classList.remove('opacity-0', 'translate-y-4');
+        button.classList.add('opacity-100', 'translate-y-0');
+      } else {
+        // 隐藏按钮：添加隐藏/偏移类，移除可见类
+        button.classList.remove('opacity-100', 'translate-y-0');
+        button.classList.add('opacity-0', 'translate-y-4');
+      }
+    };
+
+    // 点击事件监听器：平滑滚动到顶部
+    const handleClick = () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // 启用平滑滚动
+      });
+    };
+
+    // 绑定事件
+    window.addEventListener('scroll', handleScroll);
+    button.addEventListener('click', handleClick);
+
+    // 首次加载时运行一次，以确定初始状态
+    handleScroll();
+  }
+</script>
