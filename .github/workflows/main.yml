@@ -1,29 +1,37 @@
-name: Deploy to GitHub Pages and Vercel
-
-on:
-  push:
-    branches: [ gh-pages ]  # 触发于push到gh-pages
-  workflow_dispatch:  # 允许手动触发
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v5
-      - name: Install, build, and upload your site
-        uses: withastro/action@v5
-        # with:
-        #   path: .  # 项目根路径（可选，默认当前）
-        #   node-version: 20  # Node版本（可选，根据你的项目调整）
-        #   package-manager: npm  # 包管理器（可选，默认检测）
+        uses: actions/checkout@v4
+
+      # 1. 设置 Node.js 环境
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # 建议使用稳定版本
+
+      # 2. 安装依赖
+      - name: Install Dependencies
+        run: npm install
+
+      # 3. 运行生产环境构建脚本
+      # 您的 package.json 确保了这里会使用 .env.production 并输出到 'dist'
+      - name: Build Site for Production
+        run: npm run build
+      # 2. 关键修复：在输出目录创建 .nojekyll 文件，告诉 GitHub Pages 忽略 Jekyll
+      - name: Disable Jekyll for GitHub Pages
+        run: touch ./dist/.nojekyll
+
+      # 4. 明确上传产物 (Artifact)
+      # 生产环境的 outDir 是 'dist'，所以我们上传 'dist' 目录
+      - name: Upload Production Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist # <-- 确保这里是 'dist'
 
   deploy-github-pages:
+    # 保持不变
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -35,7 +43,8 @@ jobs:
         uses: actions/deploy-pages@v4
 
   trigger-vercel:
-    needs: deploy-github-pages  # 等GitHub Pages部署完再触发Vercel
+    # 保持不变
+    needs: deploy-github-pages
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Vercel Deployment
