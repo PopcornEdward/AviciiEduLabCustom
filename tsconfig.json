@@ -1,19 +1,25 @@
+// tsconfig.json - 最终修正版，使用推荐的别名路径
+
 {
+  // 🎯 关键修正：使用 "astro/tsconfigs/base" 或 "astro/tsconfigs/strict" 别名
+  // 请注意这里的路径是 `tsconfigs` (复数) 而不是 `tsconfig` (单数)!
+  "extends": "astro/tsconfigs/strict", 
   "compilerOptions": {
-    // Enable top-level await, and other modern ESM features.
     "target": "ESNext",
     "module": "ESNext",
-    // Enable node-style module resolution, for things like npm package imports.
     "moduleResolution": "node",
-    // Enable JSON imports.
+    
+    // 启用 React/TSX 支持
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    
     "resolveJsonModule": true,
-    // Enable stricter transpilation for better output.
-    "isolatedModules": true,
-    // Astro will directly run your TypeScript code, no transpilation needed.
-    "noEmit": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    
+    "isolatedModules": true,
+    "noEmit": true
   }
 }

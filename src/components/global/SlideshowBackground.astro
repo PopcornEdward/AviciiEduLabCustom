@@ -1,0 +1,198 @@
+---
+// src/components/global/SlideshowBackground.astro (最终修复版 - 按钮层级)
+import { Image } from "astro:assets";
+
+interface Props {
+  backgrounds: ImageMetadata[]; 
+  autoInterval?: number;
+}
+const { backgrounds, autoInterval = 5000 } = Astro.props;
+---
+
+<div class="fixed-slideshow-wrapper"> 
+  {
+    backgrounds.map((bgImage, index) => (
+      <div 
+        class={`slideshow-image-container ${index === 0 ? 'active' : ''}`}
+        :key={index}
+      >
+        <Image
+          src={bgImage}
+          alt={`Background ${index + 1}`}
+          width={1920}
+          height={1080}
+          class="slideshow-image"
+          loading={index === 0 ? 'eager' : 'lazy'} 
+        />
+      </div>
+    ))
+  }
+</div>
+
+<div class="slideshow-controls-overlay">
+  <button 
+    id="prev-slide" 
+    class="slide-btn left-0"
+    aria-label="Previous background"
+  >
+    &#10094;
+  </button>
+  <button 
+    id="next-slide" 
+    class="slide-btn right-0"
+    aria-label="Next background"
+  >
+    &#10095;
+  </button>
+</div>
+
+
+<style>
+/* 1. 固定背景容器 */
+.fixed-slideshow-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -20; /* 保持在所有内容之下 */
+  overflow: hidden;
+}
+
+/* 2. 图片容器样式 */
+.slideshow-image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out; 
+}
+
+.slideshow-image-container.active {
+  opacity: 1;
+}
+
+.slideshow-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 3. 按钮浮层：最高层级 */
+.slideshow-controls-overlay {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999; /* 极高 z-index 确保覆盖所有前景内容 */
+    /* 关键：让所有非按钮区域可以点击/滚动到前景内容 */
+    pointer-events: none; 
+}
+
+/* 4. 按钮样式 */
+.slide-btn {
+  /* 恢复交互属性 */
+  pointer-events: auto; /* 关键：只允许按钮区域接收点击事件 */
+  cursor: pointer !important; 
+  
+  /* 视觉样式和定位 */
+  position: absolute; /* 相对于 .slideshow-controls-overlay */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000; /* 确保按钮在覆盖层之上 */
+  padding: 1rem;
+  font-size: 2rem;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.3); 
+  border: none;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.slide-btn:hover {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.slide-btn.left-0 {
+    left: 0;
+    border-radius: 0 5px 5px 0;
+}
+
+.slide-btn.right-0 {
+    right: 0;
+    border-radius: 5px 0 0 5px;
+}
+</style>
+
+<script define:vars={{ autoInterval, backgroundsCount: backgrounds.length }}>
+  // 客户端脚本：使用 IIFE 确保代码在组件加载后立即执行
+  (() => {
+    // 查找 wrapper
+    const wrapper = document.querySelector('.fixed-slideshow-wrapper');
+    if (!wrapper) return;
+
+    // 查找按钮和图片容器
+    // 按钮现在使用 document.querySelector 因为它们是全局 fixed 的
+    const prevBtn = document.querySelector('#prev-slide');
+    const nextBtn = document.querySelector('#next-slide');
+    const containers = Array.from(wrapper.querySelectorAll('.slideshow-image-container'));
+    
+    if (!prevBtn || !nextBtn || containers.length === 0) return;
+
+    // 从 define:vars 获取变量
+    const count = backgroundsCount;
+    const intervalTime = autoInterval;
+    let currentIndex = 0;
+    let intervalId;
+
+    // 核心切换逻辑
+    const showSlide = (index) => {
+      currentIndex = (index + count) % count;
+
+      containers.forEach(container => {
+        container.classList.remove('active');
+        container.style.transition = 'none'; 
+      });
+
+      const activeContainer = containers[currentIndex];
+      activeContainer.classList.add('active');
+      
+      setTimeout(() => {
+          containers.forEach(container => {
+              container.style.transition = 'opacity 1s ease-in-out';
+          });
+      }, 50);
+    };
+
+    // 自动播放
+    const startAutoplay = () => {
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, intervalTime);
+    };
+
+    // 事件处理
+    const handleNext = () => {
+      clearInterval(intervalId);
+      showSlide(currentIndex + 1);
+      startAutoplay();
+    };
+
+    const handlePrev = () => {
+      clearInterval(intervalId);
+      showSlide(currentIndex - 1);
+      startAutoplay();
+    };
+
+    // 绑定事件
+    nextBtn.addEventListener('click', handleNext);
+    prevBtn.addEventListener('click', handlePrev);
+
+    // 启动轮播
+    startAutoplay();
+  })();
+</script>

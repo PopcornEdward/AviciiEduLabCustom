@@ -1,8 +1,25 @@
-@import "tailwindcss";
-@theme {
+/* 📂 src/styles/global.css - 解决 CSS 语法和 PostCSS 导入错误的最终修正版 */
+/* 🎯 关键修正：将 @import 移到最前面 */
+/* 导入 Font Awesome 所有的样式 */
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+/* ---------------------------------------------------- */
+/* 1. @tailwind 和 @import 必须位于最顶部 */
+/* ---------------------------------------------------- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  /* base  */
- --color-base-50: oklch(97.3% 0.005 145.13);
+
+
+/* ---------------------------------------------------- */
+/* 2. CSS 变量定义 (用于 Tailwind 引用) 和通用样式 */
+/* ---------------------------------------------------- */
+
+:root {
+  /* 颜色变量定义 */
+  
+  /* base  */
+  --color-base-50: oklch(97.3% 0.005 145.13);
   --color-base-100: oklch(93.86% 0.013 141.67);
   --color-base-200: oklch(88.55% 0.021 140.81);
   --color-base-300: oklch(82.47% 0.02 140.41);
@@ -14,7 +31,7 @@
   --color-base-900: oklch(26.54% 0.006 134.86);
   --color-base-950: oklch(20.6% 0.005 145.31);
 
-  /* ORange  */
+  /* ORange  */
   --color-orange-50: oklch(96.67% 0.016 22.18);
   --color-orange-100: oklch(93.48% 0.031 25.08);
   --color-orange-200: oklch(87.73% 0.063 23.27);
@@ -27,20 +44,19 @@
   --color-orange-900: oklch(24.99% 0.084 35.46);
   --color-orange-950: oklch(19.57% 0.065 34.67);
 
-
-}
-/* CSS */
-:root {
   /* Typography */
+  /* 🎯 修复分号缺失问题 */
   font-feature-settings: "liga" 1, "calt" 1,
     /* Contextual Alternates */ "dlig" 1, /* Discretionary Ligatures */ "ss07" 1,
     /* fSquare punctuation */ "ss08" 1, /* Square quotes */ "zero" 1,
     /* Slashed zero */ "tnum" 1, /* Tabular numbers */ "cv03" 1,
     /* Open six */ "cv04" 1, /* Open nine */ "cv01" 1,
-    /* Alternate one */ "cv09", /* Flat-top three */ "cv02" 1; /* Open 4 */
+    /* Alternate one */ "cv09", /* Flat-top three */ "cv02" 1; /* <-- 关键分号 */
+    
   font-family: Inter, sans-serif;
   font-variant-numeric: tabular-nums;
 }
+
 @supports (font-variation-settings: normal) {
   /* Use variable font if supported */
   :root {

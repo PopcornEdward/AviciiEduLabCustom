@@ -1,0 +1,67 @@
+---
+// src/components/global/ParallaxBackground.astro (最终修复版 - True Parallax)
+import { Image } from "astro:assets";
+interface Props { backgrounds: ImageMetadata[]; }
+const { backgrounds } = Astro.props;
+
+// 1. 设置视距 D = 1px (与 body perspective 相同)
+const D = 1; 
+// 2. 将背景元素推到 Z 轴 -1px (Z = -1px)
+const Z = -D; 
+// 3. 计算缩放因子 S = 1 - Z/D = 1 - (-1/1) = 2
+const S = 1 - (Z / D); 
+// 4. 将整个背景容器向前缩放 S=2 倍，以抵消 Z 轴推远导致的变小。
+---
+
+<div 
+  class="parallax-background-layer"
+  style={`
+    /* 核心 3D 变换：将背景推远，并放大 */
+    transform: translateZ(${Z}px) scale(${S});
+  `}
+> 
+  {
+    // 渲染所有背景图片，它们将连接起来
+    backgrounds.map((bgImage, index) => (
+      <div 
+        class="parallax-image-section"
+      >
+        <Image
+          src={bgImage}
+          alt={`Parallax Background ${index + 1}`}
+          width={1920}
+          height={1080}
+          class="parallax-image-full"
+          loading="eager" 
+        />
+      </div>
+    ))
+  }
+</div>
+
+<style>
+/* 确保背景层固定并覆盖 */
+.parallax-background-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* 确保在内容之下 */
+  z-index: -1; 
+  /* 关键：确保它有一个 3D 变换上下文 */
+}
+
+/* 每个图片部分 */
+.parallax-image-section {
+    /* 确保图片连接，并且至少是视口高度 */
+    min-height: 100vh; 
+    overflow: hidden;
+}
+
+/* 图片本身 */
+.parallax-image-full {
+  width: 100%;
+  height: auto;
+  object-fit: cover; 
+}
+</style>

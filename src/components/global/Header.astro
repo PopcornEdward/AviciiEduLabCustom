@@ -1,0 +1,175 @@
+---
+// Header.astro - 最终版：包含 SVG 主题切换和修复了 Z-Index 的 Mobile 菜单
+const navLinks = [
+  { name: 'HOME', href: '/' },
+  { name: 'BLOG', href: '/blog' },
+  { name: 'SHOP', href: '/shop' },
+  { name: 'WORK', href: '/work' },
+  { name: 'CONTACT', href: '/contact' },
+];
+---
+
+<header class="sticky top-0 z-50 bg-white shadow-md border-b border-gray-100 dark:bg-gray-900 dark:border-gray-800 transition-colors duration-300">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      
+      <div class="flex items-center space-x-8">
+        <a href="/" class="flex-shrink-0 text-xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+          <span class="text-blue-600">Avicii</span> Lab
+        </a>
+
+        <nav class="hidden md:block h-full">
+          <ul class="flex space-x-6 h-full items-center">
+            {navLinks.map((link) => (
+              <li>
+                <a href={link.href} class="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors duration-200">
+                  {link.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        
+        <button id="search-toggle" aria-label="Search" class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">
+          <i class="fas fa-search"></i>
+        </button>
+
+        <a href="/cart" aria-label="Cart" class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors relative">
+          <i class="fas fa-shopping-cart"></i>
+        </a>
+        
+        <a href="https://wa.me/YOUR_PHONE" target="_blank" aria-label="WhatsApp" class="p-2 text-gray-600 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        
+        <a href="YOUR_IG_LINK" target="_blank" aria-label="Instagram" class="p-2 text-gray-600 hover:text-pink-600 dark:text-gray-400 dark:hover:text-pink-400 transition-colors">
+          <i class="fab fa-instagram"></i>
+        </a>
+        
+                <button id="theme-toggle" aria-label="Toggle Dark Mode" class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors relative z-50">
+            <svg class="theme-switch-icon w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20V4Z" class="left-half-fill" />
+                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 4V20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z" class="right-half-fill" />
+            </svg>
+        </button>
+        
+                <button id="mobile-menu-toggle" aria-label="Mobile Menu" class="p-2 md:hidden text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors relative z-[999]">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+    
+        <div id="mobile-menu" class="hidden pb-4 md:hidden"> 
+      <nav class="flex flex-col space-y-2">
+        {navLinks.map((link) => (
+          <a href={link.href} class="text-sm font-medium p-2 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors">
+            {link.name}
+          </a>
+        ))}
+      </nav>
+    </div>
+
+  </div>
+</header>
+<div id="search-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[9999] hidden flex items-start justify-center pt-20">
+  <div class="bg-white dark:bg-gray-900 w-full max-w-2xl p-6 rounded-lg shadow-xl transition-all duration-300">
+    <button id="search-close" class="absolute top-4 right-4 text-xl text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+    <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">站内搜索</h3>
+    <input type="search" placeholder="输入关键词搜索产品..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"/>
+    </div>
+</div>
+
+<style is:global>
+    /* 定义 SVG 填充颜色变量 */
+    :root {
+        --light-half-color: #F8F8F8; /* 默认亮色模式下的“亮”半边颜色 (接近白色) */
+        --dark-half-color: #333333; /* 默认亮色模式下的“暗”半边颜色 (深灰色) */
+    }
+
+    html.dark {
+        --light-half-color: #333333; /* 暗色模式下，原来的亮半边变为深色 */
+        --dark-half-color: #F8F8F8; /* 暗色模式下，原来的暗半边变为亮色 */
+    }
+
+    /* 默认主题 (亮模式) */
+    .theme-switch-icon .left-half-fill {
+        fill: var(--dark-half-color); /* 亮模式下左半边为深色 */
+        transition: fill 0.3s ease;
+    }
+    .theme-switch-icon .right-half-fill {
+        fill: var(--light-half-color); /* 亮模式下右半边为亮色 */
+        transition: fill 0.3s ease;
+    }
+
+    /* 暗黑主题 */
+    html.dark .theme-switch-icon .left-half-fill {
+        fill: var(--light-half-color); /* 暗模式下左半边为亮色 */
+    }
+    html.dark .theme-switch-icon .right-half-fill {
+        fill: var(--dark-half-color); /* 暗模式下右半边为深色 */
+    }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // A. 暗黑模式切换逻辑 (保持不变)
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+
+    const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (currentTheme === 'dark') {
+      htmlEl.classList.add('dark');
+    } else {
+      htmlEl.classList.remove('dark');
+    }
+
+    themeToggle?.addEventListener('click', () => {
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlEl.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+
+    // B. 搜索弹窗逻辑 (保持不变)
+    const searchToggle = document.getElementById('search-toggle');
+    const searchClose = document.getElementById('search-close');
+    const searchModal = document.getElementById('search-modal');
+
+    searchToggle?.addEventListener('click', () => {
+      searchModal?.classList.remove('hidden');
+      searchModal?.classList.add('flex');
+      
+        // 调试用，确认事件已触发
+      console.log(1); 
+    });
+
+    searchClose?.addEventListener('click', () => {
+      searchModal?.classList.add('hidden');
+      searchModal?.classList.remove('flex');
+      
+        // 调试用，确认事件已触发
+      console.log(2); 
+    });
+    
+    // C. 移动菜单切换逻辑 (修复后的稳定逻辑)
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (mobileMenuToggle && mobileMenu) {
+      mobileMenuToggle.addEventListener('click', () => {
+        // 切换 hidden 类
+        mobileMenu.classList.toggle('hidden');
+  
+      });
+    }
+  });
+</script>

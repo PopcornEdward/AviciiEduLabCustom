@@ -1,14 +1,41 @@
 ---
+// src/layouts/BaseLayout.astro
 import BaseHead from "@/components/BaseHead.astro";
 import Footer from "@/components/global/Footer.astro";
+import Header from "@/components/global/Header.astro";
+import MainPduVideo from "@/components/global/MainPduVideo.astro";
+// 引入新的组件名称
+import SlideshowBackground from "@/components/global/SlideshowBackground.astro"; 
+
+// 确保这里的路径与您的项目结构一致
+import bg1 from "@/images/homebackground/1.png";
+import bg2 from "@/images/homebackground/2.png";
+import bg3 from "@/images/homebackground/3.png";
+import bg4 from "@/images/homebackground/4.png";
+import bg5 from "@/images/homebackground/5.png";
+import bg6 from "@/images/homebackground/6.png";
+import bg7 from "@/images/homebackground/7.png";
+
+const backgrounds = [bg1, bg2, bg3, bg4, bg5, bg6, bg7];
 ---
 
 <html lang="en">
-  <head>
-    <BaseHead />
-  </head>
-  <body class="bg-white max-w-6xl mx-auto px-8 lg:px-12 flex flex-col">
-    <main class="grow"><slot /></main>
-    <Footer />
-  </body>
+  <head>
+    <BaseHead />
+  </head>
+    <body class="mx-auto relative overflow-x-hidden"> 
+    
+        <SlideshowBackground backgrounds={backgrounds} autoInterval={5000} />
+
+        <div class="relative z-10">
+        <Header />
+        <MainPduVideo />
+        
+        <main class="grow max-w-6xl mx-auto px-8 lg:px-12">
+            <slot /> 
+        </main>
+        
+        <Footer />
+    </div>
+  </body>
 </html>
