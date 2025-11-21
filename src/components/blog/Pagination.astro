@@ -1,0 +1,101 @@
+---
+// Define component props
+interface Props {
+    currentPage: number;
+    totalPages: number;
+    prevPageUrl?: string; // URL for previous page, e.g., /blog/1/
+    nextPageUrl?: string; // URL for next page, e.g., /blog/3/
+}
+
+const { currentPage, totalPages, prevPageUrl, nextPageUrl } = Astro.props;
+
+// Generate array of page numbers, e.g., [1, 2, 3]
+const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+// FIX: Modified helper function to generate page links using the /blog/N/ structure,
+// which matches the URL format observed by the user.
+const getPageLink = (pageNumber: number): string => {
+    // Page 1 links to the base blog path: /blog/
+    if (pageNumber === 1) {
+        return '/blog/'; 
+    }
+    // Pages > 1 use the /blog/N/ structure, ensuring a trailing slash for consistency.
+    return `/blog/${pageNumber}/`; 
+};
+
+// Base Tailwind classes for all pagination items (buttons, numbers)
+const baseItemClasses = "w-10 h-10 flex items-center justify-center font-medium text-base rounded-md transition-all duration-200";
+
+// Classes for arrow buttons
+const arrowClasses = (isActive: boolean) => [
+    baseItemClasses,
+    "text-xl", // Slightly larger font for arrows
+    {
+        // Active state: subtle hover effect
+        "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700": isActive,
+        // Disabled state: muted text, no interaction
+        "text-gray-400 cursor-not-allowed dark:text-gray-600": !isActive,
+    }
+];
+
+// Classes for page number buttons
+const numberClasses = (isCurrent: boolean) => [
+    baseItemClasses,
+    {
+        // Current page: distinct background and text color, subtle shadow
+        "bg-gray-900 text-white shadow-sm dark:bg-gray-100 dark:text-gray-900": isCurrent,
+        // Non-current page: transparent background, standard text, hover background
+        "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700": !isCurrent,
+    }
+];
+
+// Using SVG icons for arrows for better visual consistency
+const PrevArrow = `
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+`;
+const NextArrow = `
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+`;
+---
+
+<div class="flex justify-center mt-12 mb-8">
+    <nav class="flex items-center space-x-2" aria-label="Pagination">
+
+        <!-- Previous Page Arrow -->
+        <a 
+            href={prevPageUrl || '#'}
+            class:list={arrowClasses(!!prevPageUrl)}
+            aria-disabled={!prevPageUrl}
+            set:html={PrevArrow}
+            title="Previous Page"
+        >
+        </a>
+
+        <!-- Page Number Links -->
+        <div class="flex items-center space-x-1">
+            {pageNumbers.map((number) => (
+                <a 
+                    href={getPageLink(number)}
+                    class:list={numberClasses(number === currentPage)}
+                    aria-current={number === currentPage ? 'page' : undefined}
+                >
+                    {number}
+                </a>
+            ))}
+        </div>
+
+        <!-- Next Page Arrow -->
+        <a 
+            href={nextPageUrl || '#'}
+            class:list={arrowClasses(!!nextPageUrl)}
+            aria-disabled={!nextPageUrl}
+            set:html={NextArrow}
+            title="Next Page"
+        >
+        </a>
+    </nav>
+</div>

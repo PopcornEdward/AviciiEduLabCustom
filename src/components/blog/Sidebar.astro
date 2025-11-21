@@ -1,0 +1,41 @@
+---
+// Mock data
+const categories = [
+    { name: "Application", count: 1 },
+    { name: "Data", count: 2 },
+    { name: "Technology", count: 1 },
+    { name: "Software", count: 1 },
+    { name: "Architecture", count: 1 },
+];
+
+const tags = ["NextJs", "Tailwind", "Technology", "Software", "Silicon"];
+---
+<aside class="space-y-8">
+    <!-- Categories -->
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">分类 (Categories)</h3>
+        <ul class="space-y-2">
+            {categories.map((cat) => (
+                <li class="flex justify-between items-center text-gray-700 hover:text-blue-600 transition">
+                    <a href={`/blog/category/${cat.name.toLowerCase()}`}>{cat.name}</a>
+                    <span class="text-sm bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">{cat.count}</span>
+                </li>
+            ))}
+        </ul>
+    </div>
+
+    <!-- Tags -->
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">标签 (Tags)</h3>
+        <div class="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+                <a 
+                    href={`/blog/tag/${tag.toLowerCase()}`}
+                    class="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full hover:bg-blue-500 hover:text-white transition duration-200"
+                >
+                    {tag}
+                </a>
+            ))}
+        </div>
+    </div>
+</aside>

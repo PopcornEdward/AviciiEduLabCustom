@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content';
+// 导入 paginate 辅助函数
+// 注意：在 getStaticPaths 中解构 paginate 是推荐的做法，这里的导入是为了类型兼容
+import { paginate } from 'astro'; 
+
+// 导入所需的布局和组件
+import BlogLayout from '../../layouts/BlogLayout.astro'; 
+import PostCard from '../../components/blog/PostCard.astro';
+import Sidebar from '../../components/blog/Sidebar.astro';
+import Pagination from '../../components/blog/Pagination.astro'; // 导入分页组件
+
+
+// --- 核心：使用 paginate 生成所有分页路径 ---
+export async function getStaticPaths({ paginate }) { // 保持正确的解构
+    // 1. 获取所有文章，并按发布日期降序排序 (最新在前)
+    const allPosts = await getCollection('blog', ({ data }) => {
+        // 排除草稿
+        return data.draft !== true; 
+    });
+
+    allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+    // 2. 使用 paginate 函数进行分页
+    // 修复点 1: 每页文章数设置为 10
+    const postsPerPage = 10; // 设置每页文章数
+
+    // 调试日志：确认文章总数和分页数
+    console.log(`[PAGINATION LOG] Total posts found: ${allPosts.length}`);
+    console.log(`[PAGINATION LOG] Posts per page: ${postsPerPage}`);
+    console.log(`[PAGINATION LOG] Expected number of pages: ${Math.ceil(allPosts.length / postsPerPage)}`);
+    
+    // paginate 的第二个参数是分页配置
+    const paginatedPages = paginate(allPosts, {
+        pageSize: postsPerPage,
+        // 自定义 URL 结构：page 1 -> /blog, page 2+ -> /blog/page/2
+        route: ({ page }) => (page === 1 ? '/blog' : `/blog/page/${page}`),
+    });
+
+    // 修复：移除或修改有问题的调试日志
+    paginatedPages.forEach(p => {
+        // 使用可选链操作符（?.）安全访问 url.current，避免在某些 Astro 环境下报错
+        const path = p.url?.current || `(Path not available for Page ${p.currentPage})`;
+        console.log(`[PAGINATION LOG] Generated path for Page ${p.currentPage}: ${path}`);
+    });
+
+    return paginatedPages;
+}
+// --- getStaticPaths 结束 ---
+
+
+// 从 props 中获取当前页的数据
+const { page } = Astro.props;
+
+// 调试日志：当前页码和路径
+console.log(`[PAGINATION LOG] Currently rendering Page: ${page.currentPage} (Path: ${Astro.url.pathname})`);
+
+const posts = page.data; // 当前页的文章数组
+const totalPages = page.lastPage;
+const currentPage = page.currentPage;
+const prevPageUrl = page.url.prev;
+const nextPageUrl = page.url.next;
+---
+
+<BlogLayout title={`博客列表 - 第 ${currentPage} 页`}>
+    <!-- 增加一个容器以确保内容居中和适当的内边距，就像您截图中的那样 -->
+    <div class="container mx-auto px-4 py-16 max-w-7xl">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- 主内容区：文章列表 (lg:w-3/4) -->
+            <main class="lg:w-3/4 w-full">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-8 border-b pb-4 dark:text-white">
+                    博客文章
+                    <span class="text-xl font-medium text-gray-500 block mt-1">
+                        当前位于第 {currentPage} 页，共 {totalPages} 页
+                    </span>
+                </h1>
+
+                <!-- 布局修复点：使用 Grid 布局 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {posts.map((post) => (
+                        // 确保 PostCard 组件存在于 components/blog/PostCard.astro
+                        <PostCard post={post} />
+                    ))}
+                </div>
+
+                <!-- 分页导航组件 -->
+                <div class="mt-12">
+                    <!-- *** 调试标记 ***: 确认是否进入分页渲染区域 -->
+                    <p class="text-center text-red-500 font-bold bg-yellow-100 p-2 rounded-lg mb-4">
+                        {totalPages > 1 ? `[DEBUG MARKER]: 总页数 (${totalPages}) > 1，尝试渲染分页条。` : `[DEBUG MARKER]: 只有 1 页，不渲染分页条。`}
+                    </p>
+
+                    {totalPages > 1 && (
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            prevPageUrl={prevPageUrl}
+                            nextPageUrl={nextPageUrl}
+                        />
+                    )}
+                    <!-- 添加一个提示，如果只有一页 -->
+                    {totalPages <= 1 && (
+                        <p class="text-center text-gray-500 italic mt-8">当前只有一页。</p>
+                    )}
+                </div>
+            </main>
+
+            <!-- 侧边栏 (lg:w-1/4) -->
+            <aside class="lg:w-1/4 w-full lg:sticky lg:top-8 self-start">
+                <!-- 保持 Sidebar 组件为空调用 -->
+                <Sidebar />
+            </aside>
+        </div>
+    </div>
+</BlogLayout>

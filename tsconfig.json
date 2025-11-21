@@ -5,7 +5,10 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    
+    // **关键修改：将 'node' 升级为 'bundler' 或 'node16'**
+    // 这将解决 '找不到 @lucide/astro 或其相应类型声明' 的错误。
+    "moduleResolution": "bundler",
     
     // 启用 React/TSX 支持
     "jsx": "react-jsx",

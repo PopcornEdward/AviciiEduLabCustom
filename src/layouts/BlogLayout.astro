@@ -1,0 +1,22 @@
+---
+import ScrollToTopButton from "@/components/global/ScrollToTopButton.astro";
+import BaseHead from "@/components/BaseHead.astro";
+import Footer from "@/components/global/Footer.astro";
+import Header from "@/components/global/Header.astro";
+---
+<html>
+    <head>
+        <BaseHead />
+    </head>
+    <body>
+        <Header />
+        <div>
+            <slot />
+        </div>
+        <Footer />
+        <ScrollToTopButton />
+    </body>
+</html>
+
+    
+

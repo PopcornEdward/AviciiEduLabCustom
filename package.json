@@ -5,12 +5,11 @@
   "scripts": {
     "dev": "dotenv -e .env.development astro dev",
     "start": "npm run dev",
-    
     "build": "dotenv -e .env.production astro build",
     "preview": "dotenv -e .env.production astro preview",
-    
     "astro": "astro",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "create": "node scripts/create-post.js"
   },
   "devDependencies": {
     "@astrojs/sitemap": "^3.4.1",
@@ -23,6 +22,7 @@
     "@astrojs/react": "^4.4.2",
     "@astrojs/tailwind": "^6.0.2",
     "@fortawesome/fontawesome-free": "^7.1.0",
+    "@lucide/astro": "^0.554.0",
     "@radix-ui/react-slot": "^1.2.4",
     "alpinejs": "^3.15.1",
     "class-variance-authority": "^0.7.1",

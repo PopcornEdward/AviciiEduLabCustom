@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from 'astro:content'; 
+
+export interface Props {
+    // 假设您的博客内容集合名为 'blog'
+    post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+
+if (!post || !post.data) {
+    // 确保 post 对象有效
+    throw new Error("PostCard Component received an undefined or null post object.");
+}
+
+// 从 post.data 中提取所需的数据
+const title = post.data.title;
+const author = post.data.author || "佚名";
+const date = post.data.pubDate ? new Date(post.data.pubDate).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+}) : "未知日期";
+// 确保 category 始终是一个字符串，优先使用 category 字段，其次是第一个 tag
+const category = post.data.category || post.data.tags?.[0] || "未分类"; 
+
+// 使用摘要
+const excerpt = post.data.description || (post.body ? post.body.substring(0, 120) + '...' : '点击阅读更多'); 
+
+// 构造文章链接 (假设您的文章 slug 存储在 post.slug)
+const postUrl = `/blog/${post.slug}`;
+
+// Lucide Icons as SVG strings (用于美观和一致性)
+const UserIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+const FolderIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L6.37 3.39a2 2 0 0 0-1.69-.9H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>`;
+const CalendarIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>`;
+const BookOpenIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17a5 5 0 0 1 5-5h14a5 5 0 0 1-5 5H2z"/><path d="M2 17l.5-4h21l-.5 4"/><path d="M2 17c0 4.5 5 4.5 5 4.5s5 0 5-4.5h-5zM21 17c0 4.5-5 4.5-5 4.5s-5 0-5-4.5h5z"/></svg>`;
+---
+
+<!-- 确保所有元素都使用 class="" -->
+<article class="flex flex-col h-full bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-1">
+    <!-- Image Placeholder or Featured Image -->
+    <a href={postUrl} class="relative pt-[60%] bg-gray-100 flex items-center justify-center">
+        <!-- 假装有一个图片或使用一个图标占位符 -->
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-16 h-16 text-blue-500 opacity-60" set:html={BookOpenIcon} />
+        </div>
+    </a>
+
+    <div class="p-6 flex flex-col flex-grow">
+        <!-- Title -->
+        <h2 class="text-xl font-extrabold text-gray-800 mb-3 hover:text-blue-600 transition duration-150 leading-snug">
+            <a href={postUrl}>{title}</a>
+        </h2>
+        
+        <!-- Meta Data: Author, Category, Date -->
+        <div class="text-sm text-gray-500 mb-4 flex flex-wrap items-center space-x-3 divide-x divide-gray-300">
+            <span class="flex items-center pr-3">
+                <span class="w-4 h-4 mr-1 text-blue-500" set:html={UserIcon} />
+                {author}
+            </span>
+            <span class="flex items-center px-3">
+                <span class="w-4 h-4 mr-1 text-blue-500" set:html={FolderIcon} />
+                {category}
+            </span>
+            <span class="flex items-center pl-3">
+                <span class="w-4 h-4 mr-1 text-blue-500" set:html={CalendarIcon} />
+                {date}
+            </span>
+        </div>
+        
+        <!-- Excerpt -->
+        <p class="text-gray-600 mb-4 flex-grow text-base line-clamp-3">
+            {excerpt}
+        </p>
+
+        <!-- Read More Button -->
+        <a href={postUrl} class="inline-block self-start mt-auto px-4 py-2 text-sm text-white font-semibold bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-150 shadow-lg hover:shadow-xl">
+            阅读更多
+        </a>
+    </div>
+</article>

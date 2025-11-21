@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro'; 
+
+// 辅助函数：将日期对象格式化为 YYYY/MM/DD 路径段。
+// 保留此函数仅用于格式化显示，不用于 getStaticPaths
+function formatDatePath(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
+}
+
+
+// 获取文章数据的静态路径生成函数
+export async function getStaticPaths() {
+    // 1. 获取所有文章
+    const allPosts = await getCollection('blog', ({ data }) => {
+        return data.draft !== true;
+    });
+    
+    // --- 关键修正：直接使用 post.slug 作为完整的路径 ---
+    // 假设 post.slug 已经包含了 'YYYY/MM/DD/slug-name' 的完整结构
+    // 因为日志显示 post.slug 已经包含日期了。
+    // --------------------------------------------------------
+
+    // 2. 为每篇文章构造路径
+    return allPosts.map((post) => {
+        
+        // 关键修正！直接使用 post.slug，不再手动拼接日期路径。
+        // post.slug 的值可能已经是 "2025/11/21/王哥哥_1763698166210"
+        const fullSlug = post.slug; 
+
+        // 打印最终生成的路径，用于与浏览器请求的路径做对比
+        console.log(`[FINAL PATH] Generated Path: /blog/${fullSlug}`);
+
+        return {
+            // params.slug 必须包含完整的路径部分
+            params: { slug: fullSlug }, 
+            props: { post },
+        };
+    });
+}
+
+
+// 从 props 中获取当前文章数据
+const { post } = Astro.props; 
+
+// 🚨 调试信息：获取 Astro 路由参数接收到的实际路径
+const requestedSlug = Astro.params.slug; // 浏览器请求的路径
+const postSlug = post.slug; // 实际的文章 slug
+
+// Markdown 内容渲染
+const { Content } = await post.render();
+
+// 提取数据用于布局
+const { title, author, pubDate, category, tags } = post.data;
+
+const formattedDate = pubDate ? new Date(pubDate).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+}) : '未知日期';
+
+// 页面结构
+---
+
+<BaseLayout title={title}>
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <article class="bg-white p-8 rounded-xl shadow-2xl">
+            <!-- 🚨 最终调试信息 🚨 -->
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-6 text-sm">
+                <p class="font-bold">✅ 最终路径检查</p>
+                <p class="mt-1 break-all">浏览器请求 (`Astro.params.slug`): `{requestedSlug}`</p>
+                <p class="mt-1 break-all">Astro 生成 (`post.slug`): `{postSlug}`</p>
+                <p class="mt-1 break-all font-bold">请确认两者完全相同：`2025/11/21/王哥哥_1763698166210`</p>
+            </div>
+            <!-- ---------------------- -->
+
+            <!-- Header -->
+            <header class="mb-10 border-b pb-6">
+                <h1 class="text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+                    {title}
+                </h1>
+                <div class="text-lg text-gray-500 flex items-center space-x-4">
+                    <span class="flex items-center">作者: <span class="font-semibold ml-1 text-blue-600">{author}</span></span>
+                    <span>|</span>
+                    {/* 确保 pubDate 是有效的 Date 对象 */}
+                    {pubDate && (
+                        <span class="flex items-center">发布于: <time datetime={new Date(pubDate).toISOString()}>{formattedDate}</time></span>
+                    )}
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mr-2">分类: {category || '未分类'}</span>
+                    {tags && tags.map((tag) => (
+                        <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full mr-2">#{tag}</span>
+                    ))}
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="prose prose-xl max-w-none text-gray-700">
+                <Content />
+            </div>
+
+            <!-- Footer (可选: 评论区或返回链接) -->
+            <footer class="mt-12 pt-6 border-t">
+                <a href="/blog" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    返回博客列表
+                </a>
+            </footer>
+        </article>
+    </div>
+</BaseLayout>
