@@ -54,13 +54,21 @@ const postSlug = post.slug; // 实际的文章 slug
 const { Content } = await post.render();
 
 // 提取数据用于布局
-const { title, author, pubDate, category, tags } = post.data;
+const { title, author, pubDate, categories, tags } = post.data;
 
 const formattedDate = pubDate ? new Date(pubDate).toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
 }) : '未知日期';
+
+// 动态处理分类：优先使用 categories 字段，如果是数组取第一个或 join，如果不存在则 "未分类"
+let categoryDisplay = categories || "未分类";
+if (Array.isArray(categoryDisplay)) {
+    categoryDisplay = categoryDisplay.length > 0 ? categoryDisplay.join(', ') : "未分类";
+} else if (typeof categoryDisplay !== 'string') {
+    categoryDisplay = "未分类";
+}
 
 // 页面结构
 ---
@@ -91,7 +99,7 @@ const formattedDate = pubDate ? new Date(pubDate).toLocaleDateString('zh-CN', {
                     )}
                 </div>
                 <div class="mt-2 text-sm text-gray-500">
-                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mr-2">分类: {category || '未分类'}</span>
+                    <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mr-2">分类: {categoryDisplay}</span>
                     {tags && tags.map((tag) => (
                         <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full mr-2">#{tag}</span>
                     ))}

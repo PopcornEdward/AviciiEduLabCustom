@@ -1,41 +1,102 @@
 ---
-// Mock data
-const categories = [
-    { name: "Application", count: 1 },
-    { name: "Data", count: 2 },
-    { name: "Technology", count: 1 },
-    { name: "Software", count: 1 },
-    { name: "Architecture", count: 1 },
-];
+import { getCollection } from 'astro:content'; 
+// 导入内容处理中间件 (使用绝对路径别名)
+import { aggregateContentData } from '@/middleware/content-processor.js';
 
-const tags = ["NextJs", "Tailwind", "Technology", "Software", "Silicon"];
+const allPosts = await getCollection('blog');
+console.log('allPosts length:', allPosts.length); // Debug: Check if this logs in your terminal during astro dev
+
+const { sortedTags, sortedCategories } = aggregateContentData(allPosts);
+
+const categoryBaseUrl = '/blog/categories/';
+const tagBaseUrl = '/blog/tags/';
+
+const totalPosts = allPosts.length;
+console.log('totalPosts:', totalPosts); // Debug: Should log the number
 ---
-<aside class="space-y-8">
-    <!-- Categories -->
-    <div class="bg-white p-6 rounded-xl shadow-lg">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">分类 (Categories)</h3>
+
+<aside class="w-full lg:w-full space-y-8 font-inter">
+    
+    <!-- All Posts Section (所有文章) -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b flex items-center dark:text-white dark:border-gray-700">
+             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            所有文章 (All Posts)
+        </h3>
         <ul class="space-y-2">
-            {categories.map((cat) => (
-                <li class="flex justify-between items-center text-gray-700 hover:text-blue-600 transition">
-                    <a href={`/blog/category/${cat.name.toLowerCase()}`}>{cat.name}</a>
-                    <span class="text-sm bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">{cat.count}</span>
-                </li>
-            ))}
+            <li class="flex justify-between items-center text-gray-700 dark:text-gray-300 hover:text-green-600 transition p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <!-- URL: /blog (主页) -->
+                <a href="/blog" class="truncate text-base font-medium">
+                    所有文章
+                </a>
+                <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-semibold ml-4 dark:bg-green-700 dark:text-green-100">
+                    {totalPosts}
+                </span>
+            </li>
         </ul>
     </div>
 
-    <!-- Tags -->
-    <div class="bg-white p-6 rounded-xl shadow-lg">
-        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">标签 (Tags)</h3>
+    <!-- Categories Section (分类) -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b flex items-center dark:text-white dark:border-gray-700">
+             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 22h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2z"></path>
+                <path d="M9 20V6"></path>
+                <path d="M15 20V6"></path>
+            </svg>
+            分类 (Categories)
+        </h3>
+        <ul class="space-y-2">
+            {sortedCategories.length === 0 ? (
+                <li class="text-gray-500 italic text-sm p-1 dark:text-gray-400">未找到任何分类。</li>
+            ) : (
+                sortedCategories.map((cat) => (
+                    <li class="flex justify-between items-center text-gray-700 dark:text-gray-300 hover:text-blue-600 transition p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <!-- URL: /blog/Categories/背包客 (使用 slug) -->
+                        <a href={`${categoryBaseUrl}${cat.slug}`} class="truncate text-base font-medium">
+                            {cat.name}
+                        </a>
+                        <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-semibold ml-4 dark:bg-blue-700 dark:text-blue-100">
+                            {cat.count}
+                        </span>
+                    </li>
+                ))
+            )}
+        </ul>
+    </div>
+
+    <!-- Tags Section (标签) -->
+    <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b flex items-center dark:text-white dark:border-gray-700">
+             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            标签 (Tags)
+        </h3>
         <div class="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-                <a 
-                    href={`/blog/tag/${tag.toLowerCase()}`}
-                    class="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full hover:bg-blue-500 hover:text-white transition duration-200"
-                >
-                    {tag}
-                </a>
-            ))}
+            {sortedTags.length === 0 ? (
+                <p class="text-gray-500 italic text-sm dark:text-gray-400">未找到任何标签。</p>
+            ) : (
+                sortedTags.map(([tagSlug, count]) => (
+                    <a 
+                        // tagSlug 已经是小写规范化的形式
+                        // URL: /blog/tags/草稿 (使用 slug)
+                        href={`${tagBaseUrl}${tagSlug}`}
+                        class="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-700 rounded-full hover:bg-blue-500 hover:text-white transition duration-200 flex items-center space-x-2 group shadow-sm dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-blue-600"
+                    >
+                        {/* 将 slug (例如: next-js) 格式化为可读形式 (例如: Next Js) */}
+                        <span class="capitalize">{tagSlug.split('-').join(' ')}</span>
+                        <span class="text-xs bg-white text-gray-600 px-1.5 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors dark:bg-gray-600 dark:text-gray-100 dark:group-hover:bg-white dark:group-hover:text-blue-600">
+                            {count}
+                        </span>
+                    </a>
+                ))
+            )}
         </div>
     </div>
 </aside>
